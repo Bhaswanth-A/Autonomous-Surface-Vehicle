@@ -1,7 +1,7 @@
 function uk = Control(xk, tk)
 
 global WPctr
-
+ 
 %% Extract states
 x = xk(1);
 y = xk(2);
@@ -10,19 +10,41 @@ u = xk(4);
 v = xk(5);
 r = xk(6);
 
-%% Compute Control - commands throttle
-uc = 5; % 5m/s
-error = (uc - u);
+% %% Rudder
+% tau_rudder = 0;
+% theta_ref = ;
+% 
+% K_efficiency = 0.8;
+% L_rudder = 6.75 * 10^(-3); %m2
+% LG = 0.673; %m
+% 
+% num = [1];
+% denom = [tau_rudder 1];
+% theta_tf = tf(num, denom);
+% 
+% theta_rudder = theta_ref * theta_tf;
+% 
+% F_rudder = K_efficiency * sin(theta_rudder) * L_rudder * u;
+% tau_r = F_rudder * LG; % output
+% 
+% %% Thruster Engine
+% m = 8.4367; % kg (mass of USV)
+% B = 3.10636; % linear damper
+% K_thrust = 0.020188;
+% 
+% rho = 1025; % kg/m3 density of water
+% D = 0.05; % m propeller diameter
+% n = ;
+% 
+% tau_u = K_thrust * rho * D^4 * n^2 - F_rudder;
 
-kp = 20;
+%% Compute velocity
+u_ref = 1.5; % m/s
+kp = 0.5;
+ki = 0.0653;
+kd = 0;
 
-dt = kp*(uc-u);
-if dt > 100
-    dt = 100;
-end
-if dt < 0
-    dt = 0;
-end
+ur = pid(kp,ki,kd);
 
 %% Rudder Angle command
 kpsip = 2.5;
@@ -44,27 +66,15 @@ if sqrt((x-xc(WPctr))^2 + (y-yc(WPctr))^2) < 10
 end
 
 rc = 0;
-dr = kpsip*delpsi + kpsid*(rc-r);
-if dr > 30*pi/180
-    dr = 30*pi/180;
+rr = kpsip*delpsi + kpsid*(rc-r);
+if rr > 30*pi/180
+    rr = 30*pi/180;
 end
-if dr < -30*pi/180
-    dr = -30*pi/180;
+if rr < -30*pi/180
+    rr = -30*pi/180;
 end
 
-uk = [dt;dr]; % Outputs throttle and rudder command
-
-
-
-
-
-
-
-
-
-
-
-
+uk = [ur;rr];
 
 
 

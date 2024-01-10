@@ -33,7 +33,7 @@ for k = 1:length(time)-1
 
     %% Control
     if AUTONOMOUS
-        uk = Control(xk, tk);
+        uk = Controller(xk, tk);
     end
 
     %% Send current state to animation
@@ -42,10 +42,10 @@ for k = 1:length(time)-1
     end
 
     %% Derivative calls
-    k1 = Derivatives(xk,tk,uk);
-    k2 = Derivatives(xk+k1*dt/2,tk+dt/2,uk);
-    k3 = Derivatives(xk+k2*dt/2,tk+dt/2,uk);
-    k4 = Derivatives(xk+k3*dt,tk+dt,uk);
+    k1 = Derivatives_old(xk,tk,uk);
+    k2 = Derivatives_old(xk+k1*dt/2,tk+dt/2,uk);
+    k3 = Derivatives_old(xk+k2*dt/2,tk+dt/2,uk);
+    k4 = Derivatives_old(xk+k3*dt,tk+dt,uk);
     f = (1/6)*(k1+2*k2+2*k3+k4);
 
     xstate(:,k+1) = xstate(:,k) + f*dt;
@@ -65,8 +65,6 @@ v = xstate(5,:);
 r = xstate(6,:);
 dt = ustate(1,:);
 dr = ustate(2,:);
-
-
 
 %% Plots
 
@@ -106,17 +104,17 @@ hold on
 xlabel('Time (sec)')
 ylabel('V (m/s)')
 
-fig = figure();
-plot(time,dt,'b-','LineWidth',2)
-hold on
-xlabel('Time (sec)')
-ylabel('Thrust (0-100%)')
+% fig = figure();
+% plot(time,dt,'b-','LineWidth',2)
+% hold on
+% xlabel('Time (sec)')
+% ylabel('Thrust (0-100%)')
 
 fig = figure();
 plot(time,dr*180/pi,'b-','LineWidth',2)
 hold on
 xlabel('Time (sec)')
-ylabel('\delta_R (m/s)')
+ylabel('\delta_R (deg)')
 
 dlmwrite('Boat_Data.txt',[time' xstate' ustate'])
 
