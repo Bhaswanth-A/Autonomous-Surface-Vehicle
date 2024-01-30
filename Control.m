@@ -10,41 +10,24 @@ u = xk(4);
 v = xk(5);
 r = xk(6);
 
-% %% Rudder
-% tau_rudder = 0;
-% theta_ref = ;
-% 
-% K_efficiency = 0.8;
-% L_rudder = 6.75 * 10^(-3); %m2
-% LG = 0.673; %m
-% 
-% num = [1];
-% denom = [tau_rudder 1];
-% theta_tf = tf(num, denom);
-% 
-% theta_rudder = theta_ref * theta_tf;
-% 
-% F_rudder = K_efficiency * sin(theta_rudder) * L_rudder * u;
-% tau_r = F_rudder * LG; % output
-% 
-% %% Thruster Engine
-% m = 8.4367; % kg (mass of USV)
-% B = 3.10636; % linear damper
-% K_thrust = 0.020188;
-% 
-% rho = 1025; % kg/m3 density of water
-% D = 0.05; % m propeller diameter
-% n = ;
-% 
-% tau_u = K_thrust * rho * D^4 * n^2 - F_rudder;
-
 %% Compute velocity
-u_ref = 1.5; % m/s
-kp = 0.5;
-ki = 0.0653;
-kd = 0;
+% u_ref = 1.5; % m/s
+% kp = 0.5;
+% ki = 0.0653;
+% kd = 0;
+% 
+% ur = pid(kp,ki,kd);
 
-ur = pid(kp,ki,kd);
+uc = 5; % 5m/s before
+kp = 70;
+dt = kp*(uc-u);
+
+if dt > 100
+    dt = 100;
+end
+if dt < 0
+    dt = 0;
+end
 
 %% Rudder Angle command
 kpsip = 2.5;
@@ -74,7 +57,7 @@ if rr < -30*pi/180
     rr = -30*pi/180;
 end
 
-uk = [ur;rr];
+uk = [dt;rr];
 
 
 

@@ -7,8 +7,10 @@ psi = xstate(3);
 u = xstate(4);
 v = xstate(5);
 r = xstate(6);
-ur = ustate(1);
+dt = ustate(1);
 rr = ustate(2);
+% tau_u = ustate(1);
+% tau_r = ustate(2);
 
 A1 = -0.0152;
 A2 = 0.1305;
@@ -27,8 +29,10 @@ A14 = 0.7005;
 A15 = 106.4701;
 A16 = 0.0385;
 
-flowDir = 45;
-flowVel = 0.2;
+% flowDir = 45;
+% flowVel = 0.2;
+flowDir = 0;
+flowVel = 0;
 
 dAngle = flowDir - psi;
 if dAngle > 2*pi
@@ -44,11 +48,11 @@ flowv = flowVel * sin(dAngle);
 K_efficiency = 0.8;
 L_rudder = 6.75 * 10^(-3); %m2
 LG = 0.673; %m
-
-B1 = rr + A10*abs(v)*v + A11*abs(r)*v + A12*abs(v)*r + A13*abs(r)*r - A16*u*v;
-disp(B1)
-K_denom = A15 * K_efficiency * L_rudder * u * LG;
-theta_ref = asin(B1/K_denom);
+% 
+% B1 = rr + A10*abs(v)*v + A11*abs(r)*v + A12*abs(v)*r + A13*abs(r)*r - A16*u*v;
+% disp(B1)
+% K_denom = A15 * K_efficiency * L_rudder * u * LG;
+% theta_ref = asin(B1/K_denom);
 
 %% Rudder Model
 tau_rudder = 0.0986; % seconds
@@ -57,7 +61,14 @@ num = [1];
 denom = [tau_rudder 1];
 theta_tf = tf(num, denom);
 
+theta_ref = rr;
+
 theta_rudder = theta_ref * theta_tf;
+w = 1/t;
+s = j*w;
+theta_rudder = evalfr(theta_rudder,s);
+
+disp(theta_rudder)
 
 F_rudder = K_efficiency * sin(theta_rudder) * L_rudder * u;
 tau_r = F_rudder * LG; % output
@@ -71,14 +82,15 @@ rho = 1025; % kg/m3 density of water
 D = 0.05; % m propeller diameter
 % n = ;
 
+f_throttle = 242.7027 * (dt)^(-1/2);
+
 % tau_u = K_thrust * rho * D^4 * n^2 - F_rudder;
 tau_u = B * u - F_rudder;
-
 
 %% Dynamics
 
 u_dot = A1*v*r - A2*u - A3*abs(u)*u + A4*tau_u;
-v_dot = A5*u*r -A6*v -A7*abs(v)*v - A8*abs(r)*v - A9*abs(v)*r;
+v_dot = A5*u*r - A6*v -A7*abs(v)*v - A8*abs(r)*v - A9*abs(v)*r;
 r_dot = -A10*abs(v)*v - A11*abs(r)*v - A12*abs(v)*r - A13*abs(r)*r - A14*r + A15*tau_r + A16*u*v;
 
 u_new = u + flowu;

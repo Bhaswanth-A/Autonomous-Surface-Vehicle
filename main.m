@@ -2,12 +2,14 @@ close all
 clear 
 clc
 
-global uk WPctr
+global uk WPctr Pen i
 
 WPctr = 1;
+Pen = 0;
+i = 0;
 
 %% Time vector
-dt = 0.03;
+dt = 0.04;
 time = 0:dt:200;
 
 %% Initial conditions
@@ -16,13 +18,7 @@ ystate = zeros(2, length(time));
 
 x0 = [0 0 0 0 0 0]';
 
-ANIMATE = 0;
-AUTONOMOUS = 1;
-
-if ANIMATE
-    animation_setup();
-    pause
-end
+init_parameters()
 
 xstate(:,1) = x0;
 
@@ -31,18 +27,13 @@ for k = 1:length(time)-1
     xk = xstate(:,k);
     tk = time(k);
 
-    %% Control
-    if AUTONOMOUS
-        uk = Controller(xk, tk);
-    end
-
-    %% Send current state to animation
-    if ANIMATE
-        boat_animation(xk,uk,tk);
-    end
+    uk = Controller(xk, tk);
 
     %% Derivative calls
     k1 = Derivatives_old(xk,tk,uk);
+
+    blackbox(xk,tk,uk);
+
     k2 = Derivatives_old(xk+k1*dt/2,tk+dt/2,uk);
     k3 = Derivatives_old(xk+k2*dt/2,tk+dt/2,uk);
     k4 = Derivatives_old(xk+k3*dt,tk+dt,uk);
@@ -50,11 +41,8 @@ for k = 1:length(time)-1
 
     xstate(:,k+1) = xstate(:,k) + f*dt;
     ustate(:,k+1) = uk;
+
 end
-
-%% Integration
-% [T, R] = ode45(Kinetics,time,x0);
-
 
 %% Extract states
 x = xstate(1,:);
@@ -63,7 +51,7 @@ psi = xstate(3,:);
 u = xstate(4,:);
 v = xstate(5,:);
 r = xstate(6,:);
-dt = ustate(1,:);
+du = ustate(1,:);
 dr = ustate(2,:);
 
 %% Plots
@@ -104,11 +92,11 @@ hold on
 xlabel('Time (sec)')
 ylabel('V (m/s)')
 
-% fig = figure();
-% plot(time,dt,'b-','LineWidth',2)
-% hold on
-% xlabel('Time (sec)')
-% ylabel('Thrust (0-100%)')
+fig = figure();
+plot(time,du,'b-','LineWidth',2)
+hold on
+xlabel('Time (sec)')
+ylabel('Thrust')
 
 fig = figure();
 plot(time,dr*180/pi,'b-','LineWidth',2)

@@ -1,7 +1,6 @@
-global auv;
+function init_parameters
 
-% The used model is described in the following paper
-% Verification of a Six-Degree of Freedom Simulation Model for the REMUS Autonomous Underwater Vehicle
+global auv;
 
 auv.m = 30.51; %kg
 auv.Izz = 3.45;
@@ -31,3 +30,5 @@ auv.Nuv = -2.4;
 auv.Nuudelta = 6.15;
 
 auv.M = [auv.m-auv.Xdotu,0,0;0,auv.m-auv.Ydotv,auv.m*auv.xg-auv.Ydotr;0,auv.m*auv.xg-auv.Ndotv,auv.Izz-auv.Ndotr];
+
+save("parameters.mat")
