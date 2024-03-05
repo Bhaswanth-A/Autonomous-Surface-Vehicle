@@ -13,6 +13,7 @@ r = xk(6);
 % Compute Control - commands throttle
 uc = 5; % Enter desired speed
 kp = 200;
+ki = 0;
 du = kp*(uc-u);
 
 if du > 100
